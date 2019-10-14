@@ -31,3 +31,5 @@ project/plugins/project/
 # Ignore all local history of files
 
 # End of https://www.gitignore.io/api/sbt,scala,visualstudiocode
+
+scala/metals/.*

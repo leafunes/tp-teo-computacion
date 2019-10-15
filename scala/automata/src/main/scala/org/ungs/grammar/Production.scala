@@ -5,11 +5,10 @@ case class Production(left: Variable, right: List[Symbol]){
     def getAllSymbols(): List[Symbol] = left :: right 
 
     override def toString() = {
-        left.value + " -> " + right.foldRight("")((x, y) => y + x.value)
+        left.value + " -> " + right.foldLeft("")((x, y) => x + y.value)
     }
 
 }
-
 
 //TODO: chequear integridad
 object Production{
@@ -21,11 +20,9 @@ object Production{
 
         val left: Option[Variable] = variables.find(x => x.value == prodAsList(0))
 
-        val options: List[List[Symbol]] = rawOptions.map(x => {
-            val rightAsList = x.split(",").toList
-            variables.filter(x => rightAsList.contains(x.value)).toList :::
-                terminals.filter(x => rightAsList.contains(x.value)).toList
-        })
+        val options: List[List[Symbol]] = rawOptions.map(_.split(",").toList
+            .flatMap(x => (variables.toList ::: terminals.toList)
+                    .find(_.value == x)))
 
         return options.map(o => new Production(left.get, o))
 

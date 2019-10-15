@@ -4,3 +4,4 @@ abstract class Symbol {
     val value : String
 
 }
+

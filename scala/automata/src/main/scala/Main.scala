@@ -5,16 +5,17 @@ import org.ungs.grammar.GrammarUtils._
 object Main extends App {
 
 
-  val grammar: Grammar = Grammar("a,bc,c", "A,B,C,S", "S", 
-    List("S->A",
-      "A->B,a|a",
+  val grammar: Grammar = Grammar(
+    "a,bc,c", 
+    "A,B,C,S", 
+    "S", 
+    List(
+      "S->A,bc",
+      "A->B,a|e|C",
       "C->c"
       )
   )
 
-  println(grammar
-    .removeNotIn(getReachables)
-    .removeNotIn(getGenerators)
-    )
+  println(getUnits(grammar))
 
 }

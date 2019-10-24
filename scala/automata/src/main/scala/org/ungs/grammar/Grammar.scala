@@ -2,20 +2,16 @@ package org.ungs.grammar
 
 case class Grammar(terminals: Set[Terminal], variables: Set[Variable], init: Variable, productions: List[Production]) {
 
-
+    val allSymbols = variables.toList ::: terminals.toList
+    
     def FNC(): Grammar = {
         return this;
     }
 
-    def getAllSymbols(): List[Symbol] = {
-
-        variables.toList ::: terminals.toList
-    }
-
     //TODO: esta bien el nombre? es REMOVE?
     def removeNotIn(setGenerator: (Grammar) => Set[Symbol]): Grammar = {
-        val allSimbols: List[Symbol] = this.getAllSymbols()
-        val notIn = allSimbols.filter(x => !setGenerator(this).contains(x))
+        val allSimbols: List[Symbol] = this.allSymbols
+        val notIn = allSymbols.filter(x => !setGenerator(this).contains(x))
         
         val newProductions = this.productions
             .filter(p => !notIn.contains(p.left))
@@ -39,7 +35,38 @@ case class Grammar(terminals: Set[Terminal], variables: Set[Variable], init: Var
     
         return new Grammar(newTerminals, newVariables, init, newProductions)
     
-    
+        }
+
+      def removeNulleables(nulleablesGenerator: (Grammar) => Set[Symbol]): Grammar = {
+        
+        val nulleables = nulleablesGenerator(this).toList
+        println(nulleables)
+
+        def go(rightSide: List[Symbol], nulleables: List[Symbol]): List[List[Symbol]] = {
+
+            if(rightSide.isEmpty)
+                return List(Nil)
+
+            val h = rightSide.head
+            val t = rightSide.tail
+
+            if(nulleables.contains(h)){
+                val without: List[List[Symbol]] = go(t, nulleables)
+                val within: List[List[Symbol]] = without.map(x => h :: x)
+                return within ::: without
+            }else{
+                return go(t, nulleables).map(x => h :: x)
+            }
+
+        }
+
+        val newProductions: List[Production] = this.productions
+            .flatMap(p => go(p.right.
+                        filter(r => r != Epsilon), nulleables)
+                .filterNot(x => x.isEmpty)
+                .map(x => Production(p.left, x)))
+
+        return new Grammar(terminals, variables, init, newProductions)
       }
 
       override def toString(): String = {

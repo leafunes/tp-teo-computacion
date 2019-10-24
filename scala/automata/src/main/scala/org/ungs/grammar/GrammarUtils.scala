@@ -22,7 +22,7 @@ object GrammarUtils {
 
         def go(base: List[Symbol]): List[Symbol] = {
         val generator: List[Symbol] = grammar.productions
-            .filter(p => !p.right.filter(x => base.contains(x)).isEmpty)
+            .filter(p => p.right.filterNot(x => base.contains(x)).isEmpty)
             .map(p => p.left)
             .filter(x => !base.contains(x))
 
@@ -31,5 +31,36 @@ object GrammarUtils {
         
         return go(grammar.terminals.toList).toSet
         
+    }
+
+    def getNulleables(grammar: Grammar):Set[Symbol] = {
+        def go(base: List[Symbol]): List[Symbol] = {
+            val nulleables: List[Symbol] = grammar.productions
+                .filter(p => p.right.filterNot(x => base.contains(x)).isEmpty)
+                .map(p => p.left)
+                .filter(x => !base.contains(x))
+    
+            if(nulleables.isEmpty) base else go(nulleables ::: base)
+        }
+
+        return go(grammar.productions.filter(_.isEpsilon).map(_.left)).toSet
+    }
+
+    def getUnits(grammar: Grammar):Set[(Variable, Variable)] = {
+
+        def go(base:Set[(Variable, Variable)] ):Set[(Variable, Variable)] = {
+            val units:Set[(Variable, Variable)] = grammar.productions
+                .filter(p => p.isUnit())
+                .flatMap(p => base.filter((t) => t._1.equals(p.left)).map(pr => (pr._1, p.getUnit().get)))
+                .filter(x => !base.contains(x))
+                .toSet
+                
+                
+            if(units.isEmpty) base else go(units.union(base))
+                
+        }
+
+        return go(grammar.variables.map(x => (x, x)))
+
     }
 }

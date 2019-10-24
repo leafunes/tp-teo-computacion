@@ -7,32 +7,51 @@ class ProductionSpec extends BaseSpec{
     val A = Variable("A")
     val b = Terminal("b")
 
-    test("getAllSymbolsSpec"){
+    test("get all symbols"){
         val left = V
         val right = A :: b :: Epsilon :: Nil
 
-        val prod = Production(left, right)
+        val prod = new Production(left, right)
 
         prod.getAllSymbols() should be (List(V, A, b, Epsilon))
 
     }
 
-    test("isUnitSpec"){
+    test("is unit"){
         val left = V
         val right = A :: Nil
 
-        val prod = Production(left, right)
+        val prod = new Production(left, right)
 
         assert(prod.isUnit())
     }
 
-    test("isUnitWithTerminalSpec"){
+    test("is unit with terminal in right"){
         val left = V
         val right = b :: Nil
 
-        val prod = Production(left, right)
+        val prod = new Production(left, right)
 
         assert(prod.isUnit() == false)
+    }
+
+    test("get unit in unit production"){
+        val left = V
+        val right = A :: Nil
+
+        val prod = new Production(left, right)
+
+        assert(prod.getUnit().get == A)
+
+    }
+
+    test("get unit in not unit production"){
+        val left = V
+        val right = b :: Nil
+
+        val prod = new Production(left, right)
+
+        assert(prod.getUnit() == None)
     }
 
 }

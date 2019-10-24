@@ -27,6 +27,11 @@ project/plugins/project/
 !.vscode/launch.json
 !.vscode/extensions.json
 
+### Scala
+scala/automata/.bloop/*
+scala/automata/.metals/*
+scala/automata/project/.bloop/*
+
 ### VisualStudioCode Patch ###
 # Ignore all local history of files
 

@@ -6,6 +6,7 @@ class ProductionSpec extends BaseSpec{
     val V = Variable("V")
     val A = Variable("A")
     val b = Terminal("b")
+    val d = Terminal("d")
 
     test("get all symbols"){
         val left = V
@@ -52,6 +53,19 @@ class ProductionSpec extends BaseSpec{
         val prod = new Production(left, right)
 
         assert(prod.getUnit() == None)
+    }
+
+    test("builder ok"){
+        val variablesSet = Set(V, A)
+        val terminalsSet = Set(b, d)
+
+        val buildedProd = Production("V->A,b|d", terminalsSet, variablesSet)
+
+        buildedProd.size should be equals 2
+        
+        assert(buildedProd(0).left == V)
+        buildedProd(0).right should be (List(A, b))
+
     }
 
 }

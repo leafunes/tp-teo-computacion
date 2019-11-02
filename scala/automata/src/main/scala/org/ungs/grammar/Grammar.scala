@@ -11,27 +11,25 @@ case class Grammar(terminals: Set[Terminal], variables: Set[Variable], init: Var
     //TODO: esta bien el nombre? es REMOVE?
     def removeNotIn(setGenerator: (Grammar) => Set[Symbol]): Grammar = {
         val allSimbols: List[Symbol] = this.allSymbols
-        val notIn = allSymbols.filter(x => !setGenerator(this).contains(x))
-        
+        val generated  = setGenerator(this)
+
         val newProductions = this.productions
-            .filter(p => !notIn.contains(p.left))
-            .filter(p => notIn.intersect(p.right).isEmpty)
+            .filter(p => !generated.contains(p.left))
+            .filter(p => p.right.forall(x => !generated.contains(x)))
         
-        val newTerminals: Set[Terminal] = newProductions
-            .flatMap( p => p.getAllSymbols()
-                .flatMap(x => x match {
+        val newTerminals: Set[Terminal] = allSymbols
+            .flatMap(x => x match {
                     case t:Terminal => Some(t)
                     case _ => None
                 }
-            )).toSet
+            ).filterNot(x => generated.contains(x)).toSet
 
-        val newVariables: Set[Variable] = newProductions
-            .flatMap( p => p.getAllSymbols()
-                .flatMap(x => x match {
+        val newVariables: Set[Variable] = allSymbols
+            .flatMap(x => x match {
                     case v:Variable => Some(v)
                     case _ => None
                 }
-            )).toSet
+            ).filterNot(x => generated.contains(x)).toSet
     
         return new Grammar(newTerminals, newVariables, init, newProductions)
     
@@ -40,7 +38,6 @@ case class Grammar(terminals: Set[Terminal], variables: Set[Variable], init: Var
       def removeNulleables(nulleablesGenerator: (Grammar) => Set[Symbol]): Grammar = {
         
         val nulleables = nulleablesGenerator(this).toList
-        println(nulleables)
 
         def go(rightSide: List[Symbol], nulleables: List[Symbol]): List[List[Symbol]] = {
 

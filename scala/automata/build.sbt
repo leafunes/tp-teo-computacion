@@ -22,6 +22,7 @@ version := "1.0"
 
 resolvers += "Artima Maven Repository" at "http://repo.artima.com/releases"
 
+fork in Test := true
 
 
 // Want to use a published library in your project?

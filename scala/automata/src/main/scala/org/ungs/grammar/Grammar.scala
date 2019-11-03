@@ -1,35 +1,65 @@
 package org.ungs.grammar
+import org.ungs.grammar.GrammarUtils._
 
 case class Grammar(terminals: Set[Terminal], variables: Set[Variable], init: Variable, productions: List[Production]) {
 
     val allSymbols = variables.toList ::: terminals.toList
     
     def FNC(): Grammar = {
-        return this;
+
+        val cleaned = this.clean()
+        lazy val counter: Iterator[Int] = Iterator.from(1)
+        println(cleaned.productions)
+
+        val variablesForTerminals: Map[Terminal, Variable] = cleaned.terminals
+            .flatMap(t => t match {
+                case tr: Terminal => Some((tr -> Variable(tr.value + counter.next().toString())))
+                case _ => None
+            }).toMap
+
+        val productionsWithNoTerminals:List[Production] = cleaned.productions
+            .filterNot(p => p.isTerminal())
+            .map(p => new Production(p.left, p.right.flatMap(r => r match {
+                case t:Terminal => variablesForTerminals.get(t) //Existe siempre la key
+                case other => Some(other)
+            }))) ::: 
+            variablesForTerminals.toList.map(t => new Production(t._2, t._1 :: Nil))
+    
+        val newProductions = productionsWithNoTerminals.flatMap(p => p.normalize(counter)) :::
+            cleaned.productions.filter(p => p.isTerminal())
+
+        val newVariables: Set[Variable] = (variables.toList :::
+            newProductions.flatMap(p => p.getAllSymbols().flatMap(s => s match {
+                case v:Variable => Some(v)
+                case _ => None
+            }))).distinct.toSet
+
+        return new Grammar(this.terminals, newVariables, this.init, newProductions)
+
     }
+
+    def clean(): Grammar = {
+        return this.removeNulleables(getNulleables)
+            .removeUnits(getUnits)
+            .removeNotIn(getGenerators)
+            .removeNotIn(getReachables)
+
+    }
+
+
 
     //TODO: esta bien el nombre? es REMOVE?
     def removeNotIn(setGenerator: (Grammar) => Set[Symbol]): Grammar = {
-        val allSimbols: List[Symbol] = this.allSymbols
-        val generated  = setGenerator(this)
+        val generated = setGenerator(this)
+        val notIn = allSymbols.filterNot(s => generated.contains(s))
 
         val newProductions = this.productions
-            .filter(p => !generated.contains(p.left))
-            .filter(p => p.right.forall(x => !generated.contains(x)))
+            .filterNot(p => notIn.contains(p.left))
+            .filter(p => p.right.intersect(notIn).isEmpty)
         
-        val newTerminals: Set[Terminal] = allSymbols
-            .flatMap(x => x match {
-                    case t:Terminal => Some(t)
-                    case _ => None
-                }
-            ).filterNot(x => generated.contains(x)).toSet
+        val newTerminals: Set[Terminal] = terminals.filterNot(x => notIn.contains(x)).toSet
 
-        val newVariables: Set[Variable] = allSymbols
-            .flatMap(x => x match {
-                    case v:Variable => Some(v)
-                    case _ => None
-                }
-            ).filterNot(x => generated.contains(x)).toSet
+        val newVariables: Set[Variable] = variables.filterNot(x => notIn.contains(x)).toSet
     
         return new Grammar(newTerminals, newVariables, init, newProductions)
     

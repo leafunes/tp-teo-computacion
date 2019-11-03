@@ -19,6 +19,8 @@ class GrammarSpec extends BaseSpec {
     val setTerminals = Set(b, c, d)
 
     def prodWithVars = (str: String) => Production(str, setTerminals, setVariables) 
+
+    def getSetOfVariables = (str: String) => str.split(",").map(new Variable(_)).toSet
     
     val p1 = Production("S->A,B", setTerminals, setVariables)
     val p2 = Production("A->b,B", setTerminals, setVariables)
@@ -39,19 +41,18 @@ class GrammarSpec extends BaseSpec {
     test("remove not in"){
         val prods = List(p1, p2 ,p3).flatten
         val grammar = new Grammar(setTerminals, setVariables, S, prods) 
-        val generator:((Grammar) => Set[Symbol]) = (x) => Set(A)
+        val generator:((Grammar) => Set[Symbol]) = (x) => Set(B, b)
 
         val newGrammar = grammar.removeNotIn(generator)
 
         newGrammar.allSymbols should not contain (A)
+        newGrammar.allSymbols should contain (B)
         newGrammar.productions.size should be (1)
 
         assert(newGrammar.productions(0) == prodWithVars("B->b")(0))
 
         newGrammar.productions
             .filter(p => p.getAllSymbols().contains(A)).size should be (0)
-
-
 
     }
 
@@ -61,13 +62,22 @@ class GrammarSpec extends BaseSpec {
         val generator:((Grammar) => Set[Symbol]) = (x) => Set(V)
         val newGrammar = grammar.removeNotIn(generator)
 
+        newGrammar.allSymbols.size should be (0)
+        newGrammar.productions.size should be (0)
+
+    }
+
+    test("remove not in with generator with all Symbols"){
+        val prods = List(p1, p2 ,p3).flatten
+        val grammar = new Grammar(setTerminals, setVariables, S, prods) 
+        val generator:((Grammar) => Set[Symbol]) = (x) => setTerminals ++ setVariables
+        val newGrammar = grammar.removeNotIn(generator)
+
         newGrammar.allSymbols should contain allElementsOf (grammar.allSymbols)
         grammar.allSymbols should contain allElementsOf (newGrammar.allSymbols)
 
         newGrammar.productions
             .filter(p => p.getAllSymbols().contains(B)).size should be (3)
-
-
     }
 
     test("remove nulleables"){
@@ -132,6 +142,27 @@ class GrammarSpec extends BaseSpec {
         val newGrammar = grammar.removeUnits(generator)
 
         newGrammar.productions should contain allElementsOf(prodWithVars("S->A,B|C,D|B,D"))
+
+    }
+
+    test("FNC simple"){
+        val grammar = Grammar("a,b", "A,B,C,S", "S", List(
+            "S->A,a",
+            "A->B,a,C,b",
+            "B->b",
+            "C->b"
+        ))
+
+        val fnc = grammar.FNC()
+
+        val newVariables = getSetOfVariables("A,B,C,S,a1,b2,a1Cb23,Cb24")
+        
+        fnc.productions should contain allElementsOf(Production("S->A,a1", grammar.terminals, newVariables))
+        fnc.variables should contain allElementsOf(newVariables)
+        newVariables should contain allElementsOf(fnc.variables)
+        assert(fnc.productions.forall(p => {
+            (p.right.size == 2 && !p.haveTerminal()) || p.isTerminal()
+        }))
 
     }
 

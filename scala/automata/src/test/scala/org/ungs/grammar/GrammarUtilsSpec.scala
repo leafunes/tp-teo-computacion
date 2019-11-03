@@ -1,6 +1,7 @@
 package org.ungs.grammar
 import org.ungs.BaseSpec
 import org.ungs.grammar.GrammarUtils._
+import org.scalatest.Ignore
 
 class GrammarUtilsSpec extends BaseSpec{
 
@@ -11,6 +12,7 @@ class GrammarUtilsSpec extends BaseSpec{
     val D = Variable("D")
     val S = Variable("S")
 
+    val aa = Terminal("a")
     val b = Terminal("b")
     val c = Terminal("c")
     val d = Terminal("d")
@@ -25,6 +27,23 @@ class GrammarUtilsSpec extends BaseSpec{
         val reachables = getReachables(grammar)
 
         reachables should not contain(B)
+        reachables should contain(aa)
+        reachables.size should be (3)
+
+    }
+
+    test("get reachables should remove terminal simple"){
+        val grammar = Grammar("a,b", "A,B,S", "S", List(
+            "S->A",
+            "A->a",
+            "B->b"
+        ))
+
+        val reachables = getReachables(grammar)
+
+        reachables should not contain(B)
+        reachables should contain(aa)
+        reachables should not contain(b)
         reachables.size should be (3)
 
     }
@@ -68,6 +87,7 @@ class GrammarUtilsSpec extends BaseSpec{
         val generatos = getGenerators(grammar)
 
         generatos should not contain(B)
+        generatos should contain(aa)
         generatos.size should be(3)
     }
 
@@ -164,6 +184,10 @@ class GrammarUtilsSpec extends BaseSpec{
         val units = getUnits(grammar)
 
         units should contain allOf ((S,A), (S,C), (S,B))
+    }
+
+    ignore("clean"){
+        fail()
     }
 
 }

@@ -5,6 +5,8 @@ class ProductionSpec extends BaseSpec{
 
     val V = Variable("V")
     val A = Variable("A")
+    val B = Variable("B")
+    val C = Variable("C")
     val b = Terminal("b")
     val d = Terminal("d")
 
@@ -62,6 +64,65 @@ class ProductionSpec extends BaseSpec{
         val prod = new Production(left, right)
 
         assert(prod.getUnit() == None)
+    }
+
+    test("is terminal"){
+        val left = V
+        val right = b :: Nil
+
+        val prod = new Production(left, right)
+
+        assert(prod.isTerminal())
+    }
+
+    test("is terminal with all terminal"){
+        val left = V
+        val right = b :: b :: Nil
+
+        val prod = new Production(left, right)
+
+        assert(prod.isTerminal() == false)
+    }
+
+    test("is terminal with terminal and variables"){
+        val left = V
+        val right = A :: b :: Nil
+
+        val prod = new Production(left, right)
+
+        assert(prod.isTerminal() == false)
+    }
+
+    test("have terminal"){
+        val left = V
+        val right = b :: Nil
+
+        val prod = new Production(left, right)
+
+        assert(prod.haveTerminal())
+    }
+
+    test("have terminal with variables"){
+        val left = V
+        val right = A :: b :: Nil
+
+        val prod = new Production(left, right)
+
+        assert(prod.haveTerminal())
+    }
+
+    test("normalize"){
+        val left = V
+        val right = A :: B :: C ::  Nil
+        val counter: Iterator[Int] = Iterator.from(1)
+
+        val prod = new Production(left, right)
+        
+        val newProds = prod.normalize(counter)
+
+        newProds.size should be (2)
+        newProds should contain (new Production(V, A :: new Variable("BC1") :: Nil))
+        newProds should contain (new Production(new Variable("BC1"), B:: C :: Nil))
     }
 
     test("builder ok"){

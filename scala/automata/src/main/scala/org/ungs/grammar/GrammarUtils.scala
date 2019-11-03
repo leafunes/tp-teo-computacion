@@ -21,14 +21,13 @@ object GrammarUtils {
     def getGenerators(grammar: Grammar):Set[Symbol] = {
 
         def go(base: List[Symbol]): List[Symbol] = {
-        val generator: List[Symbol] = grammar.productions
-            .filter(p => p.right.filterNot(x => base.contains(x)).isEmpty)
-            .map(p => p.left)
-            .filter(x => !base.contains(x))
+            val generator: List[Symbol] = grammar.productions
+                .filter(p => p.right.forall(x => base.contains(x)) || p.isEpsilon())
+                .map(p => p.left)
+                .filter(x => !base.contains(x))
 
-        if(generator.isEmpty) base else go(generator ::: base)
+            if(generator.isEmpty) base else go(generator ::: base)
         }
-        
         return go(grammar.terminals.toList).toSet
         
     }
@@ -51,7 +50,7 @@ object GrammarUtils {
         def go(base:Set[(Variable, Variable)] ):Set[(Variable, Variable)] = {
             val units:Set[(Variable, Variable)] = grammar.productions
                 .filter(p => p.isUnit())
-                .flatMap(p => base.filter((t) => t._1.equals(p.left)).map(pr => (pr._1, p.getUnit().get)))
+                .flatMap(p => base.filter((t) => t._2.equals(p.left)).map(pr => (pr._1, p.getUnit().get)))
                 .filter(x => !base.contains(x))
                 .toSet
                 

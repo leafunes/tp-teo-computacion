@@ -8,6 +8,7 @@ class GrammarSpec extends BaseSpec {
     val B = Variable("B")
     val C = Variable("C")
     val D = Variable("D")
+    val E = Variable("E")
     val S = Variable("S")
 
     val b = Terminal("b")
@@ -20,7 +21,7 @@ class GrammarSpec extends BaseSpec {
     def prodWithVars = (str: String) => Production(str, setTerminals, setVariables) 
     
     val p1 = Production("S->A,B", setTerminals, setVariables)
-    val p2 = Production("A->a,B", setTerminals, setVariables)
+    val p2 = Production("A->b,B", setTerminals, setVariables)
     val p3 = Production("B->b", setTerminals, setVariables)
 
     test("get all symbols"){
@@ -99,17 +100,51 @@ class GrammarSpec extends BaseSpec {
         grammar.allSymbols should contain allElementsOf (newGrammar.allSymbols)
     }
 
+    test("remove units simple"){
+        val grammar = Grammar("b,c,d", "A,B,C,D,S", "S", List(
+            "S->A",
+            "A->b,B",
+            "B->b"
+        ))
+        val generator:((Grammar) => Set[(Variable, Variable)]) = (x) => Set((S, A))
+
+        val newGrammar = grammar.removeUnits(generator)
+
+        newGrammar.productions should contain (prodWithVars("S->b,B")(0))
+
+    }
+
+    test("remove units hard"){
+        val grammar = Grammar("", "S,A,B,C,D,E", "S", List(
+            "S->A,B|C,D|C",
+            "A->B",
+            "B->C",
+            "C->D",
+            "C->E",
+            "E->B,D"
+        ))
+        val generator:((Grammar) => Set[(Variable, Variable)]) = (x) => {
+            Set((A, A), (B, B), (C, C), (D, D), (E, E), (S, S),
+            (A,B), (A, C), (A, D), (A, E), (B, C), (B, D), (B, E), (C, D), (C, E),
+            (S, C), (S, D), (S, E))
+        }
+
+        val newGrammar = grammar.removeUnits(generator)
+
+        newGrammar.productions should contain allElementsOf(prodWithVars("S->A,B|C,D|B,D"))
+
+    }
+
     test("builder ok"){
         val prods = List(p1, p2 ,p3).flatten
         val grammar = new Grammar(setTerminals, setVariables, S, prods) 
 
         val buildedGrammar = Grammar("b,c,d", "A,B,C,D,S", "S", List(
             "S->A,B",
-            "A->a,B",
+            "A->b,B",
             "B->b"
-            ))
+        ))
             
-
         grammar.allSymbols should contain allElementsOf (buildedGrammar.allSymbols)
         buildedGrammar.allSymbols should contain allElementsOf (grammar.allSymbols)
 

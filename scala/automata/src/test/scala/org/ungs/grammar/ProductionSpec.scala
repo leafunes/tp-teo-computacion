@@ -27,6 +27,15 @@ class ProductionSpec extends BaseSpec{
         assert(prod.isUnit())
     }
 
+    test("is unit with variable and terminal"){
+        val left = V
+        val right = A :: b :: Nil
+
+        val prod = new Production(left, right)
+
+        assert(prod.isUnit() == false)
+    }
+
     test("is unit with terminal in right"){
         val left = V
         val right = b :: Nil

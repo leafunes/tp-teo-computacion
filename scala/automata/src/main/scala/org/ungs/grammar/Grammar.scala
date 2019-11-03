@@ -66,6 +66,19 @@ case class Grammar(terminals: Set[Terminal], variables: Set[Variable], init: Var
         return new Grammar(terminals, variables, init, newProductions)
       }
 
+      def removeUnits(unitsGenerator: (Grammar) => Set[(Variable, Variable)]): Grammar = {
+          
+        val generated = unitsGenerator(this)
+        val newProductions = generated.flatMap(u => {
+            productions.filterNot(p => p.isUnit())
+                .filter(pr => pr.left == u._2)
+                .map(x => Production(u._1, x.right))
+        }).toList
+
+        return new Grammar(terminals, variables, init, newProductions)
+
+      }
+
       override def toString(): String = {
         val initialStr = s"Inital: ${this.init.value}"
 

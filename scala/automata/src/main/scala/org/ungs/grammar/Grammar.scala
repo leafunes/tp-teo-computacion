@@ -9,7 +9,6 @@ case class Grammar(terminals: Set[Terminal], variables: Set[Variable], init: Var
 
         val cleaned = this.clean()
         lazy val counter: Iterator[Int] = Iterator.from(1)
-        println(cleaned.productions)
 
         val variablesForTerminals: Map[Terminal, Variable] = cleaned.terminals
             .flatMap(t => t match {

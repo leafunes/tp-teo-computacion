@@ -131,7 +131,7 @@ object Grammar {
         val terminalSet : Set[Terminal] = terminals.split(",").distinct.map(x => new Terminal(x)).toSet
         val variableSet : Set[Variable] = variables.split(",").distinct.map(x => new Variable(x)).toSet
         val init = Variable(initStr)
-        val prods: List[Production] = productions.map(x => Production(x, terminalSet, variableSet)).flatten
+        val prods: List[Production] = productions.flatMap(x => Production(x, terminalSet, variableSet))
 
 
         return new Grammar(terminalSet, variableSet, init, prods)

@@ -49,7 +49,7 @@ object Production{
 
     def apply(singleProduction: String, terminals: Set[Terminal], variables: Set[Variable]): List[Production] = {
 
-        val prodAsList: List[String] = singleProduction.split("->").toList
+        val prodAsList: List[String] = singleProduction.split("(\\s)*->(\\s)*").toList
         val rawOptions: List[String] = prodAsList(1).split("\\|").toList
 
         val left: Option[Variable] = variables.find(x => x.value == prodAsList(0))

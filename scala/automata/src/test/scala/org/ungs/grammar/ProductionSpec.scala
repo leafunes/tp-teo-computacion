@@ -121,8 +121,8 @@ class ProductionSpec extends BaseSpec{
         val newProds = prod.normalize(counter)
 
         newProds.size should be (2)
-        newProds should contain (new Production(V, A :: new Variable("BC1") :: Nil))
-        newProds should contain (new Production(new Variable("BC1"), B:: C :: Nil))
+        newProds should contain (new Production(V, A :: new Variable("V1") :: Nil))
+        newProds should contain (new Production(new Variable("V1"), B:: C :: Nil))
     }
 
     test("builder ok"){

@@ -186,8 +186,4 @@ class GrammarUtilsSpec extends BaseSpec{
         units should contain allOf ((S,A), (S,C), (S,B))
     }
 
-    ignore("clean"){
-        fail()
-    }
-
 }

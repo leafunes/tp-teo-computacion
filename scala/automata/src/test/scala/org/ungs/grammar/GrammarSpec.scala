@@ -155,15 +155,28 @@ class GrammarSpec extends BaseSpec {
 
         val fnc = grammar.FNC()
 
-        val newVariables = getSetOfVariables("A,B,C,S,a1,b2,a1Cb23,Cb24")
+        val newVariables = getSetOfVariables("A,B,C,S,V1,V2,V3,V4")
         
-        fnc.productions should contain allElementsOf(Production("S->A,a1", grammar.terminals, newVariables))
+        fnc.productions should contain allElementsOf(Production("S->A,V1", grammar.terminals, newVariables))
         fnc.variables should contain allElementsOf(newVariables)
         newVariables should contain allElementsOf(fnc.variables)
         assert(fnc.productions.forall(p => {
             (p.right.size == 2 && !p.haveTerminal()) || p.isTerminal()
         }))
 
+    }
+
+    ignore("clean"){
+        val grammar = Grammar("0,1", "A,B,C,S", "S", List(
+            "S->0,A,0|1,B,1|B,B",
+            "A->C",
+            "B->S|A",
+            "C->S|e"
+        ))
+
+        println(grammar.clean())
+
+        fail()
     }
 
     test("builder ok"){

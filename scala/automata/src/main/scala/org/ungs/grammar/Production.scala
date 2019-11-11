@@ -29,7 +29,7 @@ case class Production(left: Variable, right: List[Symbol]){
         def go(leftSide:Variable, rightSide: List[Symbol]): List[(Variable, List[Symbol])] = {
             if(rightSide.size <= 2)
                 return List((leftSide, rightSide))
-            val newSymbol = Variable(rightSide.tail.foldRight(counter.next().toString())((s, str) => s.value + str))
+            val newSymbol = Variable("V" + counter.next.toString())//Variable(rightSide.tail.foldRight(counter.next().toString())((s, str) => s.value + str))
             return (leftSide, rightSide.head :: newSymbol :: Nil) ::
                 go(newSymbol, rightSide.tail)
             

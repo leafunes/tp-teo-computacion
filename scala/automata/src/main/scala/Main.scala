@@ -16,6 +16,6 @@ object Main extends App {
       )
   )
 
-  println(getUnits(grammar))
+  println(grammar.FNC())
 
 }

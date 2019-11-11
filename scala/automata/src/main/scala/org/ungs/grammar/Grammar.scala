@@ -12,7 +12,7 @@ case class Grammar(terminals: Set[Terminal], variables: Set[Variable], init: Var
 
         val variablesForTerminals: Map[Terminal, Variable] = cleaned.terminals
             .flatMap(t => t match {
-                case tr: Terminal => Some((tr -> Variable(tr.value + counter.next().toString())))
+                case tr: Terminal => Some((tr -> Variable("V" + counter.next().toString())))
                 case _ => None
             }).toMap
 

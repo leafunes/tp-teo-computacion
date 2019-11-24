@@ -62,4 +62,23 @@ object GrammarUtils {
         return go(grammar.variables.map(x => (x, x)))
 
     }
+
+    def getAllCombinations(terminals: List[Terminal]): List[(List[Terminal], List[Terminal])] = {
+
+        def go(acc: List[(List[Terminal], List[Terminal])]):
+            List[(List[Terminal], List[Terminal])] = {
+            
+            if(acc.head._2.isEmpty)
+                acc.tail
+            else 
+                go((acc.head._2.head :: acc.head._1, acc.head._2.tail) :: acc)
+            
+
+        }
+
+        go(List((List(terminals.head), terminals.tail))).map(y => {
+            (y._1.reverse, y._2)
+        })
+
+    }
 }

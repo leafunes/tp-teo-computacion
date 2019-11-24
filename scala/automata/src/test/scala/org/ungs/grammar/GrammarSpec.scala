@@ -174,8 +174,6 @@ class GrammarSpec extends BaseSpec {
             "C->S|e"
         ))
 
-        println(grammar.clean())
-
         fail()
     }
 

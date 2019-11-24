@@ -24,6 +24,21 @@ case class Production(left: Variable, right: List[Symbol]){
         case _ => None 
     }
 
+    def getTerminal(): Option[Terminal] = if (!isTerminal()) None else right(0) match {
+        case v:Terminal => Some(v)
+        case _ => None 
+    }
+
+    def getFirstResult(): Option[Variable] = if (isTerminal()) None else right(0) match {
+        case v:Variable => Some(v)
+        case _ => None 
+    }
+
+    def getSecondResult(): Option[Variable] = if (isTerminal() || isUnit()) None else right(1) match {
+        case v:Variable => Some(v)
+        case _ => None 
+    }
+
     def normalize(counter: Iterator[Int]): List[Production] = {
 
         def go(leftSide:Variable, rightSide: List[Symbol]): List[(Variable, List[Symbol])] = {

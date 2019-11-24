@@ -2,48 +2,71 @@ package org.ungs.automata
 
 //Conjunto de estados, alfabeto de input, funcion de trancision, estado inicial, 
 // estados finales
-sealed class FNDAE(transitionFunction: Map[(AutomataState, Symbol), Set[AutomataState]]) {
+class FNDAE(states: List[AutomataState], transitionFunction: Map[(AutomataState, Symbol), Set[AutomataState]]) {
 
     def initialState:AutomataState = transitionFunction.find(x => x._1._1.isInitial()).get._1._1
     def function = transitionFunction
 
     def isAccepted(str: List[Symbol]): Boolean = {
         
-        def go(q: AutomataState, s: List[Symbol]): Boolean = {
+        def go(q: AutomataState, s: List[Symbol], clausured: List[AutomataState]): Boolean = {
             if(s.isEmpty){
-                return q.isFinal()
+                return !clausura(q).filter(_.isFinal()).isEmpty
             }
+
             val h :: t = s
-            val nextStates:Set[AutomataState] = getNextStates(q, h)
+            val nextStates: List[AutomataState] = transitionFunction.get((q, h)).getOrElse(Set.empty).toList
             
-            if(nextStates.isEmpty)
+            val cl: Set[AutomataState] = if(clausured.contains(q) == false) clausura(q) else Set.empty[AutomataState]
+
+            if(nextStates.isEmpty && cl.isEmpty)
                 return false
-            return nextStates.foldRight(false)((q1, b) => b || go(q1, t))
+
+            return nextStates.foldRight(false)((q1, b) => b || go(q1, t, Nil)) || 
+                cl.foldRight(false)((q1, b) => b || go(q1, s, q :: clausured))
         }
 
-        return go(initialState, str)
+        return go(initialState, str, Nil)
 
     }
 
     def clausura(state: AutomataState):Set[AutomataState] = {
         
-        val initial: List[AutomataState] =  transitionFunction.get((state, Epsilon))
-            .getOrElse(Set.empty[AutomataState]).toList
+        def go(s: AutomataState, visited: List[AutomataState]): Set[AutomataState] = {
+            val initial: List[AutomataState] =  transitionFunction.get((s, Epsilon))
+                .getOrElse(Set.empty[AutomataState]).toList
+                .filterNot(visited.contains(_))
 
-        if(initial.isEmpty)
-            return Set.empty[AutomataState]
-        return (state :: initial ::: initial.flatMap(x => clausura(x).toList))
+            if(initial.isEmpty)
+                return Set.empty[AutomataState]
+            else {
+                val newVisited = (visited ::: initial).distinct
+                return (initial ::: initial.flatMap(x => go(x, newVisited))).toSet;
+            }
+        }
+
+        return (state :: go(state, state :: Nil).toList)
             .distinct.toSet
     }
 
-    def getNextStates(s: AutomataState, q: Symbol): Set[AutomataState] = {
-        val nextStates: List[AutomataState] = 
-            transitionFunction.get((s, q)).getOrElse(Set.empty).toList ::: clausura(s).toList
-        
-        return nextStates.distinct.toSet
+    def toFDA(): FNDAE = {
+
+        def go(toEvaluate: List[((AutomataState, Symbol), Set[AutomataState])],
+            acc: Map[(AutomataState, Symbol), Set[AutomataState]]):Map[(AutomataState, Symbol), Set[AutomataState]]  = {
+
+                if(toEvaluate.isEmpty)
+                    return acc
+                else
+                    null
+
+        }
+
+        return null 
+
     }
 
 }
+
 
 object FNDAE{
     def apply(statesStr: String, transitionsStrs: List[String]): FNDAE = {
@@ -51,7 +74,7 @@ object FNDAE{
         //#b -> (1: a,b,c) | (2: a,b)
         //c -> (1: a,b,c) | (2: a,b)
 
-        val states = statesStr.split("(\\s)*,(\\s)*")
+        val states:List[AutomataState] = statesStr.split("(\\s)*,(\\s)*").toList
             .map(s => AutomataState(s))
 
         val transitionsMap = transitionsStrs.flatMap(x => {
@@ -68,6 +91,8 @@ object FNDAE{
             })
         }).toMap
 
-        return new FNDAE(transitionsMap)
+        return new FNDAE(states, transitionsMap)
     }
 }
+
+

@@ -186,4 +186,16 @@ class GrammarUtilsSpec extends BaseSpec{
         units should contain allOf ((S,A), (S,C), (S,B))
     }
 
+    test("get all combinations test"){
+        val listOfTerminals = List(Terminal("a"), Terminal("b"), Terminal("c"), Terminal("d"))
+
+        val allCombinations = getAllCombinations(listOfTerminals)
+
+        allCombinations.size should be (3)
+        allCombinations should contain ((List(Terminal("a")), List(Terminal("b"),Terminal("c"),Terminal("d"))))
+        allCombinations should contain ((List(Terminal("a"), Terminal("b")), List(Terminal("c"),Terminal("d"))))
+        allCombinations should contain ((List(Terminal("a"), Terminal("b"),Terminal("c")), List(Terminal("d"))))
+
+    }
+
 }

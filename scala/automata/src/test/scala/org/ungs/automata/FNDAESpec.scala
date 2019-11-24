@@ -10,7 +10,8 @@ class FNDAESpec extends BaseSpec{
             "c -> (1: c)"
         ));
 
-        val automata = new FNDAE(Map[(AutomataState, Symbol), Set[AutomataState]](
+        val automata = new FNDAE(List(AutomataState("#a"), AutomataState("b"), AutomataState("*c")),
+        Map[(AutomataState, Symbol), Set[AutomataState]](
             ((AutomataState("#a"), Symbol("0")), Set(AutomataState("b"))),
             ((AutomataState("b"), Symbol("1")), Set(AutomataState("*c"))),
             ((AutomataState("*c"), Symbol("1")), Set(AutomataState("*c"))),
@@ -41,16 +42,19 @@ class FNDAESpec extends BaseSpec{
 
     test("simple string epsilon accept") {
         val buildedAutomata = FNDAE("#a, b, *c", List(
-            "a -> (0: b)",
+            "a -> (0: b) | (e: b)",
             "b -> (1: c) | (e: a)",
             "c -> (1: c)"
         ));
 
-        val str = "00011111".toList.map(x => Symbol(x.toString()))
+        val str = "00011".toList.map(x => Symbol(x.toString()))
+        val str2 = "11111".toList.map(x => Symbol(x.toString()))
 
         val acceepted = buildedAutomata.isAccepted(str)
+        val acceepted2 = buildedAutomata.isAccepted(str2)
 
         assert(acceepted)
+        //assert(acceepted2)
 
     }
 

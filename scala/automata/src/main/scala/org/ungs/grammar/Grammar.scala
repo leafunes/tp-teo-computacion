@@ -5,7 +5,7 @@ case class Grammar(terminals: Set[Terminal], variables: Set[Variable], init: Var
 
     val allSymbols = variables.toList ::: terminals.toList
     
-    def FNC(): Grammar = {
+    def FNC(): FNCGrammar = {
 
         val cleaned = this.clean()
         lazy val counter: Iterator[Int] = Iterator.from(1)
@@ -23,7 +23,7 @@ case class Grammar(terminals: Set[Terminal], variables: Set[Variable], init: Var
                 case other => Some(other)
             }))) ::: 
             variablesForTerminals.toList.map(t => new Production(t._2, t._1 :: Nil))
-    
+      
         val newProductions = productionsWithNoTerminals.flatMap(p => p.normalize(counter)) :::
             cleaned.productions.filter(p => p.isTerminal())
 
@@ -33,7 +33,7 @@ case class Grammar(terminals: Set[Terminal], variables: Set[Variable], init: Var
                 case _ => None
             }))).distinct.toSet
 
-        return new Grammar(this.terminals, newVariables, this.init, newProductions)
+        return new FNCGrammar(this.terminals, newVariables, this.init, newProductions)
 
     }
 
@@ -44,8 +44,6 @@ case class Grammar(terminals: Set[Terminal], variables: Set[Variable], init: Var
             .removeNotIn(getReachables)
 
     }
-
-
 
     //TODO: esta bien el nombre? es REMOVE?
     def removeNotIn(setGenerator: (Grammar) => Set[Symbol]): Grammar = {
@@ -62,63 +60,63 @@ case class Grammar(terminals: Set[Terminal], variables: Set[Variable], init: Var
     
         return new Grammar(newTerminals, newVariables, init, newProductions)
     
+    }
+
+    def removeNulleables(nulleablesGenerator: (Grammar) => Set[Symbol]): Grammar = {
+    
+    val nulleables = nulleablesGenerator(this).toList
+
+    def go(rightSide: List[Symbol], nulleables: List[Symbol]): List[List[Symbol]] = {
+
+        if(rightSide.isEmpty)
+            return List(Nil)
+
+        val h = rightSide.head
+        val t = rightSide.tail
+
+        if(nulleables.contains(h)){
+            val without: List[List[Symbol]] = go(t, nulleables)
+            val within: List[List[Symbol]] = without.map(x => h :: x)
+            return within ::: without
+        }else{
+            return go(t, nulleables).map(x => h :: x)
         }
 
-      def removeNulleables(nulleablesGenerator: (Grammar) => Set[Symbol]): Grammar = {
+    }
+
+    val newProductions: List[Production] = this.productions
+        .flatMap(p => go(p.right.
+                    filter(r => r != Epsilon), nulleables)
+            .filterNot(x => x.isEmpty)
+            .map(x => Production(p.left, x)))
+
+    return new Grammar(terminals, variables, init, newProductions)
+    }
+
+    def removeUnits(unitsGenerator: (Grammar) => Set[(Variable, Variable)]): Grammar = {
         
-        val nulleables = nulleablesGenerator(this).toList
+    val generated = unitsGenerator(this)
+    val newProductions = generated.flatMap(u => {
+        productions.filterNot(p => p.isUnit())
+            .filter(pr => pr.left == u._2)
+            .map(x => Production(u._1, x.right))
+    }).toList
 
-        def go(rightSide: List[Symbol], nulleables: List[Symbol]): List[List[Symbol]] = {
+    return new Grammar(terminals, variables, init, newProductions)
 
-            if(rightSide.isEmpty)
-                return List(Nil)
+    }
 
-            val h = rightSide.head
-            val t = rightSide.tail
+    override def toString(): String = {
+    val initialStr = s"Inital: ${this.init.value}"
 
-            if(nulleables.contains(h)){
-                val without: List[List[Symbol]] = go(t, nulleables)
-                val within: List[List[Symbol]] = without.map(x => h :: x)
-                return within ::: without
-            }else{
-                return go(t, nulleables).map(x => h :: x)
-            }
+    val terminalsStr = "Terminals: " + this.terminals.foldLeft("")((x, y) => x + y.value + " ")
+    val variablesStr = "Variables: " + this.variables.foldLeft("")((x, y) => x + y.value + " ")
 
-        }
+    val productionsStr = "Productions:\n" + this.productions
+        .foldLeft("")((x, y) => x + y.toString + "\n")
 
-        val newProductions: List[Production] = this.productions
-            .flatMap(p => go(p.right.
-                        filter(r => r != Epsilon), nulleables)
-                .filterNot(x => x.isEmpty)
-                .map(x => Production(p.left, x)))
-
-        return new Grammar(terminals, variables, init, newProductions)
-      }
-
-      def removeUnits(unitsGenerator: (Grammar) => Set[(Variable, Variable)]): Grammar = {
-          
-        val generated = unitsGenerator(this)
-        val newProductions = generated.flatMap(u => {
-            productions.filterNot(p => p.isUnit())
-                .filter(pr => pr.left == u._2)
-                .map(x => Production(u._1, x.right))
-        }).toList
-
-        return new Grammar(terminals, variables, init, newProductions)
-
-      }
-
-      override def toString(): String = {
-        val initialStr = s"Inital: ${this.init.value}"
-
-        val terminalsStr = "Terminals: " + this.terminals.foldLeft("")((x, y) => x + y.value + " ")
-        val variablesStr = "Variables: " + this.variables.foldLeft("")((x, y) => x + y.value + " ")
-
-        val productionsStr = "Productions:\n" + this.productions
-            .foldLeft("")((x, y) => x + y.toString + "\n")
-
-        return initialStr + "\n" + terminalsStr + "\n" + variablesStr + "\n" + productionsStr
-      }
+    return initialStr + "\n" + terminalsStr + "\n" + variablesStr + "\n" + productionsStr
+    }
 
 }
 

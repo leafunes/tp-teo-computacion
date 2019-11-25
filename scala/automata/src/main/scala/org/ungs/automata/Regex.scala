@@ -1,5 +1,6 @@
 package org.ungs.automata
 
+/*
 class Regex(states: List[AutomataState], transitionFunction: Map[(AutomataState, Symbol), Set[AutomataState]]) 
     extends FNDAE(states, transitionFunction) {
     def t = transitionFunction
@@ -146,4 +147,4 @@ object Regex{
         return new Regex(initState :: states, fullStates.toMap);
 
     }
-}
+}*/

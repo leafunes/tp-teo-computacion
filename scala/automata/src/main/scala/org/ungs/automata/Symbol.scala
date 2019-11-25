@@ -2,6 +2,8 @@ package org.ungs.automata
 
 case class Symbol(value: String){
     
+    override def toString(): String = value
+
 }
 
 object Symbol{

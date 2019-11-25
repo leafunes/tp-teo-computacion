@@ -8,6 +8,7 @@ trait AutomataState{
     def isNormal(): Boolean
     def fold(other:AutomataState): AutomataState
 
+
 }
 
 case class InitialState(q: String) extends AutomataState{
@@ -18,8 +19,14 @@ case class InitialState(q: String) extends AutomataState{
     def isNormal() = false
 
     def fold(other: AutomataState): AutomataState = {
+        if(other.isInitial())
+            return new InitialState(this.q + other.name)
+            
         return new NormalState(this.q + other.name)
     }
+
+    override def toString(): String = "#" + name
+
 }
 
 case class FinalState(q: String) extends AutomataState{
@@ -30,10 +37,13 @@ case class FinalState(q: String) extends AutomataState{
     def isNormal() = false
 
     def fold(other: AutomataState): AutomataState = {
-        //se que yo sou final, no hace falta el check
+        //se que yo soy final, no hace falta el check
         return new FinalState(this.q + other.name)
         
     }
+
+    override def toString(): String = "*" + name
+
 
 }
 
@@ -48,6 +58,9 @@ case class NormalState(q: String) extends AutomataState{
         if(other.isFinal()) new FinalState(this.q + other.name)
         else new NormalState(this.q + other.name)
     }
+
+    override def toString(): String = name
+
 }
 
 

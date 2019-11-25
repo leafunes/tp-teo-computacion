@@ -1,6 +1,7 @@
 package org.ungs.automata
 import org.ungs.BaseSpec
 
+/*
 class RegexSpec extends BaseSpec{
 
     ignore("regex simple"){
@@ -57,3 +58,4 @@ class RegexSpec extends BaseSpec{
     }
 
 }
+*/

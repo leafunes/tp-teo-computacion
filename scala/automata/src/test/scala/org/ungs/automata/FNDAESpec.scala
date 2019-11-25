@@ -4,13 +4,14 @@ import org.ungs.BaseSpec
 class FNDAESpec extends BaseSpec{
 
     test("builder ok test"){
-        val buildedAutomata = FNDAE("#a, b, *c", List(
+        val buildedAutomata = FNDAE("#a, b, *c", "0, 1",List(
             "a -> (0: b)",
             "b -> (1: c)",
             "c -> (1: c)"
         ));
 
         val automata = new FNDAE(List(AutomataState("#a"), AutomataState("b"), AutomataState("*c")),
+        Set(Symbol("0"), Symbol("1")),
         Map[(AutomataState, Symbol), Set[AutomataState]](
             ((AutomataState("#a"), Symbol("0")), Set(AutomataState("b"))),
             ((AutomataState("b"), Symbol("1")), Set(AutomataState("*c"))),
@@ -23,7 +24,7 @@ class FNDAESpec extends BaseSpec{
     }
 
     test("simple string accept") {
-        val buildedAutomata = FNDAE("#a, b, *c", List(
+        val buildedAutomata = FNDAE("#a, b, *c", "0, 1", List(
             "a -> (0: b)",
             "b -> (1: c)",
             "c -> (1: c)"
@@ -41,7 +42,7 @@ class FNDAESpec extends BaseSpec{
     }
 
     test("simple string epsilon accept") {
-        val buildedAutomata = FNDAE("#a, b, *c", List(
+        val buildedAutomata = FNDAE("#a, b, *c", "0, 1", List(
             "a -> (0: b) | (e: b)",
             "b -> (1: c) | (e: a)",
             "c -> (1: c)"

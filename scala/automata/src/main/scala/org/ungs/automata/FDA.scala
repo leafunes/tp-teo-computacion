@@ -29,7 +29,7 @@ class FDA (states: List[AutomataState], input: Set[Symbol], transitionFunction: 
             case(k, m) => 
                 s"${k} -> ${
                     m.map(x => (x._1._2, x._2))
-                        .map(x => s"${x._1}: (${x._2})")
+                        .map(x => s"${x._1}: ${x._2}")
                         .foldRight("")((x, y) => y + x + " | ")
                     }"
             

@@ -21,6 +21,8 @@ case class InitialState(q: String) extends AutomataState{
     def fold(other: AutomataState): AutomataState = {
         if(other.isInitial())
             return new InitialState(this.q + other.name)
+        if(other.isFinal())
+            return new InitialFinalState(this.q + other.name)
             
         return new NormalState(this.q + other.name)
     }
@@ -60,6 +62,21 @@ case class NormalState(q: String) extends AutomataState{
     }
 
     override def toString(): String = name
+
+}
+
+case class InitialFinalState(q: String) extends AutomataState{
+    def name: String = this.q
+    
+    def isFinal() = true
+    def isInitial() = true
+    def isNormal() = false
+
+    def fold(other: AutomataState): AutomataState = {
+        new InitialFinalState(this.q + other.name)
+    }
+
+    override def toString(): String = "*" + "#" + name
 
 }
 

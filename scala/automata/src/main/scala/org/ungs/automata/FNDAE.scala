@@ -45,30 +45,29 @@ class FNDAE(states: List[AutomataState], input: Set[Symbol], transitionFunction:
             }
         }
 
-        return (state :: go(state, state :: Nil).toList)
+        return (state :: go(state, state :: Nil).toList.reverse)
             .distinct.toSet
     }
 
     def toFDA(): FDA = {
 
-        def go(toEvaluate: List[Set[AutomataState]],
+        def go(toEvaluate: List[List[AutomataState]],
             acc: Map[(Set[AutomataState], Symbol), Set[AutomataState]]):Map[(Set[AutomataState], Symbol), Set[AutomataState]]  = 
             {
-            println(toEvaluate)
             if(toEvaluate.isEmpty)
                 return acc
                 
             val h :: t = toEvaluate
             val rowToAdd = input.map(x => 
                 (
-                (h, x), 
-                h.flatMap(st => transitionFunction.getOrElse((st, x), Set.empty)  ++ clausura(st)).toSet
+                (h.toSet, x), 
+                h.flatMap(st => clausura(st) ++ transitionFunction.getOrElse((st, x), Set.empty) ).toSet
                 )
                 
             ).toMap
 
-            val alreadyAdded = acc.map(x => x._2).toList
-            val newToEval = (rowToAdd.map(x => x._2).toList ::: t)
+            val alreadyAdded = acc.map(x => x._2.toList).toList
+            val newToEval = (rowToAdd.map(x => x._2.toList).toList ::: t)
                 .filterNot(alreadyAdded.contains(_))
                 .distinct.filterNot(_.isEmpty)
 
@@ -83,14 +82,12 @@ class FNDAE(states: List[AutomataState], input: Set[Symbol], transitionFunction:
             )
         ).toMap
         
-        val toEval:List[Set[AutomataState]] = initalFunction.map(x => x._2).toList.filterNot(_.isEmpty)
+        val toEval:List[List[AutomataState]] = initalFunction.map(x => x._2.toList).toList.filterNot(_.isEmpty)
         val trapState = AutomataState("TRAP")
 
-        print(initalFunction)
-
         val newFunction = go(toEval, initalFunction).map(x => {
-            val newState:AutomataState = x._1._1.foldRight(AutomataState("#"))((x1, y) => x1.fold(y))
-            val newResultState:AutomataState = x._2.foldRight(AutomataState("#"))((x1, y) => x1.fold(y))
+            val newState:AutomataState = x._1._1.foldRight(AutomataState("#"))((x1, y) => y.fold(x1))
+            val newResultState:AutomataState = x._2.foldRight(AutomataState("#"))((x1, y) => y.fold(x1))
             val newKey = (newState, x._1._2)
 
             if(x._2.isEmpty)

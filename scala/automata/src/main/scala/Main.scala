@@ -13,6 +13,7 @@ object Main extends App {
     "c -> (1: c)"
   ));
   
+  println(buildedAutomata.toFDA())
   println(buildedAutomata.toFDA().isAccepted("".toList.map(x => Symbol(x.toString()))))
   println(buildedAutomata.isAccepted("".toList.map(x => Symbol(x.toString()))))
 

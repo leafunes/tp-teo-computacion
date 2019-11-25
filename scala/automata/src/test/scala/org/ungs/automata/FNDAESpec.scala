@@ -55,7 +55,45 @@ class FNDAESpec extends BaseSpec{
         val acceepted2 = buildedAutomata.isAccepted(str2)
 
         assert(acceepted)
-        //assert(acceepted2)
+        assert(acceepted2)
+
+    }
+
+    test("FDA conversion"){
+        val buildedAutomata = FNDAE("#a, b, *c", "0, 1", List(
+            "a -> (0: b) | (e: b)",
+            "b -> (1: c) | (e: a)",
+            "c -> (1: c)"
+        ));
+
+        val str = "00011".toList.map(x => Symbol(x.toString()))
+        val str2 = "11111".toList.map(x => Symbol(x.toString()))
+
+        val acceepted = buildedAutomata.isAccepted(str)
+        val acceepted2 = buildedAutomata.isAccepted(str2)
+        val fdaAcceepted = buildedAutomata.toFDA().isAccepted(str)
+        val fdaAcceepted2 = buildedAutomata.toFDA().isAccepted(str2)
+
+        assert(acceepted)
+        assert(acceepted2)
+        assert(fdaAcceepted)
+        assert(fdaAcceepted2)
+    }
+
+    test("FDA conversion with empty string"){
+        val buildedAutomata = FNDAE("#a, b, *c", "0, 1", List(
+            "a -> (0: b) | (e: c)",
+            "b -> (1: c) | (e: a)",
+            "c -> (1: c)"
+        ));
+
+        val str = "".toList.map(x => Symbol(x.toString()))
+
+        val acceepted = buildedAutomata.isAccepted(str)
+        val fdaAcceepted = buildedAutomata.toFDA().isAccepted(str)
+
+        assert(acceepted)
+        assert(fdaAcceepted)
 
     }
 
